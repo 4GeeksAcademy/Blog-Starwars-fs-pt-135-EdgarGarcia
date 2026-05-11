@@ -1,32 +1,63 @@
-export const initialStore=()=>{
-  return{
-    message: null,
-    todos: [
-      {
-        id: 1,
-        title: "Make the bed",
-        background: null,
-      },
-      {
-        id: 2,
-        title: "Do my homework",
-        background: null,
-      }
-    ]
-  }
-}
+export const initialStore = () => {
+  return {
+    people: [],
+    planets: [],
+    vehicles: [],
+    favorites: [],
+  };
+};
 
 export default function storeReducer(store, action = {}) {
-  switch(action.type){
-    case 'add_task':
+  switch (action.type) {
 
-      const { id,  color } = action.payload
+    case "set_people":
+  return {
+    ...store,
+    people: action.payload
+  };
 
-      return {
-        ...store,
-        todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
-      };
+  case "set_planets":
+  return {
+    ...store,
+    planets: action.payload
+  };
+
+  case "add_favorite":
+
+  const exists = store.favorites.some(
+    (favorite) =>
+      favorite.uid === action.payload.uid &&
+      favorite.type === action.payload.type
+  );
+
+  if (exists) {
+    return store;
+  }
+
+  return {
+    ...store,
+    favorites: [...store.favorites, action.payload]
+  };
+  return {
+    ...store,
+    favorites: [...store.favorites, action.payload]
+  };
+
+  case "remove_favorite":
+  return {
+    ...store,
+    favorites: store.favorites.filter(
+      (favorite) => favorite.uid !== action.payload
+    )
+  };
+
+  case "set_vehicles":
+    return {
+      ...store,
+      vehicles: action.payload
+    };
+
     default:
-      throw Error('Unknown action.');
-  }    
+      return store;
+  }
 }

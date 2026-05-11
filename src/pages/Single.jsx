@@ -1,37 +1,118 @@
-// Import necessary hooks and components from react-router-dom and other libraries.
-import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import PropTypes from "prop-types";  // To define prop types for this component
-import rigoImageUrl from "../assets/img/rigo-baby.jpg"  // Import an image asset
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 
-// Define and export the Single component which displays individual item details.
-export const Single = props => {
-  // Access the global state using the custom hook.
-  const { store } = useGlobalReducer()
+export const Single = () => {
+  const { type, id } = useParams();
 
-  // Retrieve the 'theId' URL parameter using useParams hook.
-  const { theId } = useParams()
-  const singleTodo = store.todos.find(todo => todo.id === parseInt(theId));
+  const [item, setItem] = useState(null);
 
+  useEffect(() => {
+    fetch(`https://www.swapi.tech/api/${type}/${id}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setItem(data.result.properties);
+      })
+      .catch((error) => console.log(error));
+  }, [type, id]);
+
+  if (!item) {
   return (
-    <div className="container text-center">
-      {/* Display the title of the todo element dynamically retrieved from the store using theId. */}
-      <h1 className="display-4">Todo: {singleTodo?.title}</h1>
-      <hr className="my-4" />  {/* A horizontal rule for visual separation. */}
+    <div className="loading-container">
 
-      {/* A Link component acts as an anchor tag but is used for client-side routing to prevent page reloads. */}
-      <Link to="/">
-        <span className="btn btn-primary btn-lg" href="#" role="button">
-          Back home
-        </span>
-      </Link>
+      <div className="starwars-spinner"></div>
+
+      <h2 className="loading-text">
+        Loading data from the galaxy...
+      </h2>
+
     </div>
   );
-};
+}
 
-// Use PropTypes to validate the props passed to this component, ensuring reliable behavior.
-Single.propTypes = {
-  // Although 'match' prop is defined here, it is not used in the component.
-  // Consider removing or using it as needed.
-  match: PropTypes.object
+  const getDetails = () => {
+    if (type === "people") {
+      return [
+        { label: "Name", value: item.name },
+        { label: "Gender", value: item.gender },
+        { label: "Height", value: item.height },
+        { label: "Skin Color", value: item.skin_color },
+        { label: "Eye Color", value: item.eye_color },
+      ];
+    }
+
+    if (type === "planets") {
+      return [
+        { label: "Name", value: item.name },
+        { label: "Climate", value: item.climate },
+        { label: "Population", value: item.population },
+        { label: "Terrain", value: item.terrain },
+        { label: "Diameter", value: item.diameter },
+      ];
+    }
+
+    if (type === "vehicles") {
+      return [
+        { label: "Name", value: item.name },
+        { label: "Model", value: item.model },
+        { label: "Manufacturer", value: item.manufacturer },
+        { label: "Crew", value: item.crew },
+        { label: "Passengers", value: item.passengers },
+      ];
+    }
+
+    return [];
+  };
+
+  return (
+    <div className="container text-center mt-5">
+
+      <div className="row align-items-center">
+
+        <div className="col-md-6">
+          <img
+            src="https://placehold.co/800x600"
+            className="img-fluid"
+          />
+        </div>
+
+        <div className="col-md-6">
+          <h1>{item.name}</h1>
+
+          <p>
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+            accusantium doloremque laudantium.
+          </p>
+        </div>
+
+      </div>
+
+      <hr className="text-danger my-4" />
+
+      <div className="row text-danger">
+
+        {
+          getDetails().map((detail, index) => {
+            return (
+              <div className="col" key={index}>
+
+                <strong>{detail.label}</strong>
+
+                <p>{detail.value}</p>
+
+              </div>
+            );
+          })
+        }
+
+      </div>
+
+      <Link to="/">
+        <button className="btn neon-blue-btn mt-4">
+          ← Back home
+        </button>
+      </Link>
+
+    </div>
+  );
 };
